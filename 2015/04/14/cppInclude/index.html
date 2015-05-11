@@ -18,7 +18,7 @@
 <link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.2"/>
 
 
-    <meta name="description" content="三心二意，但一路从未丢失" />
+    <meta name="description" content="菜鸟也有颗想飞的心" />
 
 
 
@@ -177,7 +177,7 @@
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//object2.h</span></span><br><span class="line"><span class="keyword">class</span> Object2</span><br><span class="line">    : <span class="keyword">public</span> Object1</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    Object2();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//object2.cpp</span></span><br><span class="line">Object2::Object2()</span><br><span class="line">&#123;</span><br><span class="line"><span class="built_in">cout</span>&lt;&lt;&amp;testArray&lt;&lt;endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//main.cpp</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">()</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> obj = <span class="keyword">new</span> Object2();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>会得到两个不一样的指像testArray的地址。<br>默默得再也不改在头文件中定义变量了。改成了：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//data.h</span></span><br><span class="line"><span class="preprocessor">#ifndef Data_H</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> Data_H</span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">const</span> <span class="keyword">char</span>*testArray[];</span><br><span class="line"><span class="preprocessor">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure></p>
+<p>会得到两个不一样的指像testArray的地址。<br>默默得再也不敢在头文件中定义变量了。改成了：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//data.h</span></span><br><span class="line"><span class="preprocessor">#ifndef Data_H</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> Data_H</span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">const</span> <span class="keyword">char</span>*testArray[];</span><br><span class="line"><span class="preprocessor">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure></p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//data.cpp</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">char</span> *testArray[] = &#123;<span class="string">"testArray"</span>&#125;;</span><br></pre></td></tr></table></figure>
 
       
@@ -257,11 +257,11 @@
           <img class="site-author-image" src="/images/default_avatar.jpg" alt="Enh" />
           <p class="site-author-name">Enh</p>
         </div>
-        <p class="site-description motion-element">三心二意，但一路从未丢失</p>
+        <p class="site-description motion-element">菜鸟也有颗想飞的心</p>
         <div class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">2</span>
+              <span class="site-state-item-count">3</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -275,7 +275,7 @@
 
           <div class="site-state-item site-state-tags">
             <a href="/tags">
-              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-count">4</span>
               <span class="site-state-item-name">标签</span>
               </a>
           </div>
@@ -289,10 +289,6 @@
             
               <span class="links-of-author-item">
               <a href="https://github.com/enhhh" target="_blank">GitHub</a>
-            </span>
-            
-              <span class="links-of-author-item">
-              <a href="https://twitter.com/jj_heard" target="_blank">Twitter</a>
             </span>
             
               <span class="links-of-author-item">

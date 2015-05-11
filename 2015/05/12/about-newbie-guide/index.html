@@ -22,7 +22,7 @@
 
 
 
-  <meta name="keywords" content="cocos2d-x,game developer,cpp,coder" />
+  <meta name="keywords" content="新手引导 设计模式 cocos2d-x," />
 
 
 
@@ -43,13 +43,11 @@
   </script>
 
 
-  <title> enh's blog </title>
+  <title> 关于新手引导设计的一些新思路 // enh's blog </title>
 </head>
 
 <body>
-  <div class="container one-column 
-   page-home 
-">
+  <div class="container one-column page-post-detail">
     <div class="headband"></div>
 
     <div id="header" class="header">
@@ -126,9 +124,9 @@
       <div class="main-inner">
         <div id="content" class="content">
           
+
   <div id="posts" class="posts-expand">
     
-      
 
   <div class="post post-type-normal ">
     <div class="post-header">
@@ -139,9 +137,7 @@
           
           
             
-              <a class="post-title-link" href="/2015/05/12/about-newbie-guide/">
-                关于新手引导设计的一些新思路
-              </a>
+              关于新手引导设计的一些新思路
             
           
         </h1>
@@ -173,15 +169,13 @@
       
 
       
-        
-          <h3 id="背景">背景</h3><p>在游戏设计过程中，新手引导往往是在游戏制作偏后期的时候开始制作，这时候往往功能已经有了相应的完善，而且每个功能都已经独立完整，这时候基本不可能去更改游戏的逻辑部分，也很少有见过预留下新手引导的接口之类的。其中还有一个非常大的问题是，各自有各自的风格，变量命名方式，还有规范性，特别是Lua下基本是各自一个风格。这些都给新手引导的设计上留下了无数的坑。</p>
+        <h3 id="背景">背景</h3><p>在游戏设计过程中，新手引导往往是在游戏制作偏后期的时候开始制作，这时候往往功能已经有了相应的完善，而且每个功能都已经独立完整，这时候基本不可能去更改游戏的逻辑部分，也很少有见过预留下新手引导的接口之类的。其中还有一个非常大的问题是，各自有各自的风格，变量命名方式，还有规范性，特别是Lua下基本是各自一个风格。这些都给新手引导的设计上留下了无数的坑。</p>
 <h3 id="思路">思路</h3><p>因为不太了解其它引擎的特性，所以只讨论关于cocos2d-x(lua).<br>在cocos2d-x更新到3.x之后，新的cocostudio的加入为整个引导流程带来了很大的便利，这里考虑到新手引导至少99%以上都是对于UI控件的引导，只有极少数是自建的Node的子类。<br>1.事件的支持<br>在<code>Widget::addTouchEventListener(const ccWidgetTouchCallback&amp; callback);</code> 方法中，原来的做法是直接覆盖掉原来的旧的事件监听，我把这里改成了一个<code>std::map</code> ，用一个<code>uint32_t</code>做为key,来作为一个事件的handle.可以用来删除事件。每次事件触发都把整个map中的事件监听执行一遍，新手引导的事件无非就是触发一个事件跳到下一个引导，这样有个好处就是可以在任意能够获取到需要引导的控件的地方加入一个新的事件，这样就能在事件结束之后删掉事件监听，完全不影响原来的控件和系统，实现解耦，同时还能获取和真实事件完全一样的事件，如按钮结束了发送消息跳转还是移动跳转都可以随机应变，而不是在<code>Dispatcher</code>注册一个监听来拦截消息。而且这整个过程对于Lua来说是非常容易支持的，找到相应功能的设计者，获取相应的控件，注入新的事件，引导结束，销毁新的事件，进入下一步。</p>
 <p>例如：</p>
 <figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--function1.lua  功能1的lua文件</span></span><br><span class="line">UIDialog = &#123;&#125;</span><br><span class="line"></span><br><span class="line">UIDialog.uiButtons = &#123;&#125;</span><br><span class="line"><span class="comment">---....省略注册过程</span></span><br><span class="line"><span class="comment">---假设UIDialog.uiButtons里有N个UI::Button并且都有各自的事件，其中有非常多复杂的逻辑</span></span><br></pre></td></tr></table></figure>
 <figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">---Newbie_Guide.lua 新手引导</span></span><br><span class="line">Guide = &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Guide.init</span><span class="params">()</span></span></span><br><span class="line">    <span class="keyword">local</span> listenerID = <span class="keyword">nil</span></span><br><span class="line">    <span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">guideListener</span><span class="params">(sender,event)</span></span></span><br><span class="line">        <span class="keyword">if</span> eventType == <span class="keyword">end</span> <span class="keyword">then</span></span><br><span class="line">            <span class="comment">--发送消息给服务器完成引导，进入下一步引导</span></span><br><span class="line">            sender:removeEventListener(listenerID)</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    listenerID = UIDilog.uiButtons[x]:addTouchEventListener(guideListener)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
 <p>通过这个过程就能把新手引导从功能中剥离出来。同时可以把这个方法用于多个各种类似的场景。用于解耦。<br>（未完待续）</p>
 
-        
       
     </div>
 
@@ -195,179 +189,37 @@
       
 
       
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </div>
-  </div>
-
-
-    
-      
-
-  <div class="post post-type-normal ">
-    <div class="post-header">
-
-      
-      
-        <h1 class="post-title">
-          
-          
+        <div class="post-nav">
+          <div class="post-nav-prev post-nav-item">
             
-              <a class="post-title-link" href="/2015/04/25/build-cocos2d-x-with-qt-creator-on-osx/">
-                用QT Creator在osx下构建cocos2d-x项目
-              </a>
+          </div>
+
+          <div class="post-nav-next post-nav-item">
             
-          
-        </h1>
-      
-
-      <div class="post-meta">
-        <span class="post-time">
-          发表于 2015-04-25
-        </span>
-
-        
-
-        
-          
-            <span class="post-comments-count">
-            &nbsp; | &nbsp;
-            <a href="/2015/04/25/build-cocos2d-x-with-qt-creator-on-osx/#comments" >
-              <span class="post-comments-count ds-thread-count" data-thread-key="2015/04/25/build-cocos2d-x-with-qt-creator-on-osx/"></span>
-            </a>
-          </span>
-          
-        
-      </div>
-    </div>
-
-    <div class="post-body">
-
-      
-      
-
-      
-        
-          <h2 id="关于初衷">关于初衷</h2><p>cocos2d-x默认提供了<code>xcode</code> <code>visual studio</code> <code>eclipse</code> 等几种IDE的工程配置，几乎已经满足了全部的开发需求，似乎并没有需要去用到Qt来构建项目的必要。但是cocos2d-x的工具目前并不算完善，经常会有需求基于cocos2d-x来制作工具。而<code>Qt</code> <code>.Net</code> <code>MFC</code>几乎成了首选，如果再考虑跨平台还有性能以及同c++的交互性来说，就只剩下<code>Qt</code>了。</p>
-<h2 id="工程配置">工程配置</h2><p>  cocos2d-x并没有提供Qt的项目工程配置，为了能够用Qt开发有几种解决方案，一种是最费力的就是手动建立Qt的project file.但是缺点太明显就是费力，而且当引擎更新时整个人都会思密达了。第二种方案是利用Qt的visual studio插件。而cocos2d-x本身提供了vs的库配置。这种方案优点是简单的不能再简单了，缺点就是不能跨平台，那还不如用<code>MFC</code>来得舒服，最后一种解决方案就是cocos2d-x提供了更为通用的解决方案—cmake.</p>
-<h2 id="关于cmake">关于cmake</h2><p> cmake是个类似于ant的一个项目构建工具，开源，跨平台，主要是为了c/c++项目，起源是KDE。关于cmake的更多了解在<a href="http://sewm.pku.edu.cn/src/paradise/reference/CMake%20Practice.pdf" target="_blank" rel="external">《Cmake Practice —Cjacker》</a></p>
-<h2 id="具体配置">具体配置</h2><p>在生成一个cocos2d-x项目后可以用Qt creator打开根目录下的cmake项目(CMD+O)<br><img src="/images/qt-creator-cocos2dx-osx/1.png" alt="CMD+O"></p>
-<p>打开CMakeLists更改项目的<code>PLATFORM_SPECIFIC_SRC</code>和<code>PLATFORM_SPECIFIC_HEADERS</code><br>因为我们并没有使用COCOA，所以用和linux一样的配置。</p>
-<p>另外虽然使用的是和linux一样的配置。但是我们需要把资源文件拷到${APPNAME}.app/文件夹中。<br>具体修改可以查看如下文件<br><a href="/files/qt-creator-cocos2dx-osx/CMakeLists.txt">CMakeLists.txt</a><br>在之后可以看到整个工程项目如下：<br><img src="/images/qt-creator-cocos2dx-osx/2.png" alt="result.png"><br>编译运行之后就可以看到运行结果，和xcode一样会生成一个.app文件</p>
-
-        
-      
-    </div>
-
-    <div class="post-footer">
-      
-        <div class="post-tags">
-          
-            <a href="/tags/Qt/"> #Qt </a>
-          
-            <a href="/tags/cocos2d-x/"> #cocos2d-x </a>
-          
+              <a href="/2015/04/25/build-cocos2d-x-with-qt-creator-on-osx/">用QT Creator在osx下构建cocos2d-x项目</a>
+            
+          </div>
         </div>
       
 
       
-
-      
-      
-        <div class="post-eof"></div>
       
     </div>
   </div>
 
 
+
     
-      
-
-  <div class="post post-type-normal ">
-    <div class="post-header">
-
-      
-      
-        <h1 class="post-title">
-          
-          
-            
-              <a class="post-title-link" href="/2015/04/14/cppInclude/">
-                c/c++在头件中定义变量引起的重定义
-              </a>
-            
-          
-        </h1>
-      
-
-      <div class="post-meta">
-        <span class="post-time">
-          发表于 2015-04-14
-        </span>
-
+      <div class="comments" id="comments">
         
-
-        
-          
-            <span class="post-comments-count">
-            &nbsp; | &nbsp;
-            <a href="/2015/04/14/cppInclude/#comments" >
-              <span class="post-comments-count ds-thread-count" data-thread-key="2015/04/14/cppInclude/"></span>
-            </a>
-          </span>
-          
+          <div class="ds-thread" data-thread-key="2015/05/12/about-newbie-guide/"
+               data-title="关于新手引导设计的一些新思路" data-url="http://enhhh.github.io/2015/05/12/about-newbie-guide/">
+          </div>
         
       </div>
-    </div>
-
-    <div class="post-body">
-
-      
-      
-
-      
-        
-          <p>因为打算定义一个全局使用的变量，所以想着把所有的要实现的东西放在一个头文件中。如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#ifndef Data_H</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> Data_H</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">char</span>* testArray = </span><br><span class="line">&#123;</span><br><span class="line"><span class="string">"testArray"</span>,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="preprocessor">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure></p>
-<p>本想着有：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#ifndef</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure></p>
-<p>的嵌套，这样也应该只会执行一次，可是Link的时候无情得抛出了duplicate declare的错误。很是纳闷。想着不是自己想的那样。于是改成了:<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#ifndef Data_H</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> Data_H</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">static</span> <span class="keyword">char</span>* testArray = </span><br><span class="line">&#123;</span><br><span class="line"><span class="string">"testArray"</span>,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="preprocessor">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure></p>
-<p>把testArray改成static .成功的Link了。可是在使用的时候发现实际上这个testArray并不是同一个数组，如下：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//object1.h</span></span><br><span class="line"><span class="keyword">class</span> Object1</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    Object1();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//object1.cpp</span></span><br><span class="line">Object1::Object1()</span><br><span class="line">&#123;</span><br><span class="line"><span class="built_in">cout</span>&lt;&lt;&amp;testArray&lt;&lt;endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//object2.h</span></span><br><span class="line"><span class="keyword">class</span> Object2</span><br><span class="line">    : <span class="keyword">public</span> Object1</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    Object2();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//object2.cpp</span></span><br><span class="line">Object2::Object2()</span><br><span class="line">&#123;</span><br><span class="line"><span class="built_in">cout</span>&lt;&lt;&amp;testArray&lt;&lt;endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//main.cpp</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">()</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> obj = <span class="keyword">new</span> Object2();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>会得到两个不一样的指像testArray的地址。<br>默默得再也不敢在头文件中定义变量了。改成了：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//data.h</span></span><br><span class="line"><span class="preprocessor">#ifndef Data_H</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> Data_H</span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">const</span> <span class="keyword">char</span>*testArray[];</span><br><span class="line"><span class="preprocessor">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//data.cpp</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">char</span> *testArray[] = &#123;<span class="string">"testArray"</span>&#125;;</span><br></pre></td></tr></table></figure>
-
-        
-      
-    </div>
-
-    <div class="post-footer">
-      
-        <div class="post-tags">
-          
-            <a href="/tags/cpp/"> #cpp </a>
-          
-        </div>
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </div>
-  </div>
-
-
     
   </div>
 
-  
 
         </div>
       </div>
@@ -385,6 +237,15 @@
   <div id="sidebar" class="sidebar">
     <div class="sidebar-inner">
 
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
       
 
       <div class="site-overview">
@@ -444,6 +305,17 @@
 
       </div>
 
+      
+        <div class="post-toc-wrap sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#思路"><span class="nav-number">2.</span> <span class="nav-text">思路</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </div>
       
 
     </div>
@@ -675,6 +547,328 @@
 
 
   
+  
+<script type="text/javascript" id="bootstrap.scrollspy.custom">
+  /* ========================================================================
+  * Bootstrap: scrollspy.js v3.3.2
+  * http://getbootstrap.com/javascript/#scrollspy
+  * ========================================================================
+  * Copyright 2011-2015 Twitter, Inc.
+  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+  * ======================================================================== */
+
+  /**
+   * Custom by iissnan
+   *
+   * - Add a `clear.bs.scrollspy` event.
+   * - Esacpe targets selector.
+   */
+
+
+  +function ($) {
+    'use strict';
+
+    // SCROLLSPY CLASS DEFINITION
+    // ==========================
+
+    function ScrollSpy(element, options) {
+      this.$body          = $(document.body)
+      this.$scrollElement = $(element).is(document.body) ? $(window) : $(element)
+      this.options        = $.extend({}, ScrollSpy.DEFAULTS, options)
+      this.selector       = (this.options.target || '') + ' .nav li > a'
+      this.offsets        = []
+      this.targets        = []
+      this.activeTarget   = null
+      this.scrollHeight   = 0
+
+      this.$scrollElement.on('scroll.bs.scrollspy', $.proxy(this.process, this))
+      this.refresh()
+      this.process()
+    }
+
+    ScrollSpy.VERSION  = '3.3.2'
+
+    ScrollSpy.DEFAULTS = {
+      offset: 10
+    }
+
+    ScrollSpy.prototype.getScrollHeight = function () {
+      return this.$scrollElement[0].scrollHeight || Math.max(this.$body[0].scrollHeight, document.documentElement.scrollHeight)
+    }
+
+    ScrollSpy.prototype.refresh = function () {
+      var that          = this
+      var offsetMethod  = 'offset'
+      var offsetBase    = 0
+
+      this.offsets      = []
+      this.targets      = []
+      this.scrollHeight = this.getScrollHeight()
+
+      if (!$.isWindow(this.$scrollElement[0])) {
+        offsetMethod = 'position'
+        offsetBase   = this.$scrollElement.scrollTop()
+      }
+
+      this.$body
+        .find(this.selector)
+        .map(function () {
+          var $el   = $(this)
+          var href  = $el.data('target') || $el.attr('href')
+          var $href = /^#./.test(href) && $(escapeSelector(href)) // Need to escape selector.
+
+          return ($href
+            && $href.length
+            && $href.is(':visible')
+            && [[$href[offsetMethod]().top + offsetBase, href]]) || null
+        })
+        .sort(function (a, b) { return a[0] - b[0] })
+        .each(function () {
+          that.offsets.push(this[0])
+          that.targets.push(this[1])
+        })
+
+
+    }
+
+    ScrollSpy.prototype.process = function () {
+      var scrollTop    = this.$scrollElement.scrollTop() + this.options.offset
+      var scrollHeight = this.getScrollHeight()
+      var maxScroll    = this.options.offset + scrollHeight - this.$scrollElement.height()
+      var offsets      = this.offsets
+      var targets      = this.targets
+      var activeTarget = this.activeTarget
+      var i
+
+      if (this.scrollHeight != scrollHeight) {
+        this.refresh()
+      }
+
+      if (scrollTop >= maxScroll) {
+        return activeTarget != (i = targets[targets.length - 1]) && this.activate(i)
+      }
+
+      if (activeTarget && scrollTop < offsets[0]) {
+        $(this.selector).trigger('clear.bs.scrollspy')  // Add a custom event.
+        this.activeTarget = null
+        return this.clear()
+      }
+
+      for (i = offsets.length; i--;) {
+        activeTarget != targets[i]
+          && scrollTop >= offsets[i]
+          && (!offsets[i + 1] || scrollTop <= offsets[i + 1])
+          && this.activate(targets[i])
+      }
+    }
+
+    ScrollSpy.prototype.activate = function (target) {
+      this.activeTarget = target
+
+      this.clear()
+
+      var selector = this.selector +
+        '[data-target="' + target + '"],' +
+        this.selector + '[href="' + target + '"]'
+
+      var active = $(selector)
+        .parents('li')
+        .addClass('active')
+
+      if (active.parent('.dropdown-menu').length) {
+        active = active
+          .closest('li.dropdown')
+          .addClass('active')
+      }
+
+      active.trigger('activate.bs.scrollspy')
+    }
+
+    ScrollSpy.prototype.clear = function () {
+      $(this.selector)
+        .parentsUntil(this.options.target, '.active')
+        .removeClass('active')
+    }
+
+
+    // SCROLLSPY PLUGIN DEFINITION
+    // ===========================
+
+    function Plugin(option) {
+      return this.each(function () {
+        var $this   = $(this)
+        var data    = $this.data('bs.scrollspy')
+        var options = typeof option == 'object' && option
+
+        if (!data) $this.data('bs.scrollspy', (data = new ScrollSpy(this, options)))
+        if (typeof option == 'string') data[option]()
+      })
+    }
+
+    var old = $.fn.scrollspy
+
+    $.fn.scrollspy             = Plugin
+    $.fn.scrollspy.Constructor = ScrollSpy
+
+
+    // SCROLLSPY NO CONFLICT
+    // =====================
+
+    $.fn.scrollspy.noConflict = function () {
+      $.fn.scrollspy = old
+      return this
+    }
+
+
+    // SCROLLSPY DATA-API
+    // ==================
+
+    $(window).on('load.bs.scrollspy.data-api', function () {
+      $('[data-spy="scroll"]').each(function () {
+        var $spy = $(this)
+        Plugin.call($spy, $spy.data())
+      })
+    })
+
+  }(jQuery);
+</script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var $sidebarInner = $('.sidebar-inner');
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.didShow', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+          var self = this;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      $(indicator).velocity('stop').velocity({
+        opacity: action === 'show' ? 0.4 : 0
+      }, { duration: 100 });
+    }
+
+  });
+</script>
+
+
+  <script type="text/javascript" id="sidebar.nav">
+    $(document).ready(function () {
+      var html = $('html');
+
+      $('.sidebar-nav li').on('click', function () {
+        var item = $(this);
+        var activeTabClassName = 'sidebar-nav-active';
+        var activePanelClassName = 'sidebar-panel-active';
+        if (item.hasClass(activeTabClassName)) {
+          return;
+        }
+
+        var currentTarget = $('.' + activePanelClassName);
+        var target = $('.' + item.data('target'));
+
+        currentTarget.velocity('transition.slideUpOut', 200, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', 200)
+            .addClass(activePanelClassName);
+        });
+
+        item.siblings().removeClass(activeTabClassName);
+        item.addClass(activeTabClassName);
+      });
+
+      $('.post-toc a').on('click', function (e) {
+        e.preventDefault();
+        var offset = $(escapeSelector(this.getAttribute('href'))).offset().top;
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        });
+      });
+
+      // Expand sidebar on post detail page by default, when post has a toc.
+      var $tocContent = $('.post-toc-content');
+      if ($tocContent.length > 0 && $tocContent.html().trim().length > 0 && isDesktop()) {
+        setTimeout(function () {
+          $('.sidebar-toggle').trigger('click');
+        }, 800);
+      }
+    });
+  </script>
+
+
+
 
   
 <script type="text/x-mathjax-config">
